@@ -768,6 +768,12 @@ int main() {
 #include <iostream>
 using namespace std;
 
+// 매크로 상수 정의 (전처리기 지시문)
+#define MAX_BUFFER_SIZE 1024
+#define VERSION "2.1.0"
+#define SQUARE(x) ((x) * (x))
+#define MIN(a, b) ((a) < (b) ? (a) : (b))
+
 int main() {
     // const 상수
     const int MAX_STUDENTS = 30;
@@ -784,6 +790,13 @@ int main() {
     cout << "학교명: " << SCHOOL_NAME << endl;
     cout << "중력가속도: " << GRAVITY << endl;
     
+    // 매크로 상수 사용
+    cout << "\n=== 매크로 상수 ===" << endl;
+    cout << "버퍼 크기: " << MAX_BUFFER_SIZE << endl;
+    cout << "프로그램 버전: " << VERSION << endl;
+    cout << "5의 제곱: " << SQUARE(5) << endl;
+    cout << "10과 15 중 작은 값: " << MIN(10, 15) << endl;
+    
     // 리터럴과 접미사
     cout << "\n=== 리터럴 종류 ===" << endl;
     cout << "정수 리터럴: " << 42 << endl;
@@ -791,12 +804,22 @@ int main() {
     cout << "float 리터럴: " << 3.14f << endl;
     cout << "long 리터럴: " << 1000000L << endl;
     cout << "unsigned 리터럴: " << 100u << endl;
-    cout << "16진수 리터럴: " << 0xFF << endl;
-    cout << "8진수 리터럴: " << 077 << endl;
-    cout << "2진수 리터럴: " << 0b1010 << endl;
+    cout << "16진수 리터럴: " << 0xFF << " (10진수: " << 0xFF << ")" << endl;
+    cout << "8진수 리터럴: " << 077 << " (10진수: " << 077 << ")" << endl;
+    cout << "2진수 리터럴: " << 0b1010 << " (10진수: " << 0b1010 << ")" << endl;
     
     // 배열에서 constexpr 사용
     int numbers[ARRAY_SIZE] = {1, 2, 3, 4, 5};
+    
+    // 매크로를 이용한 배열
+    char buffer[MAX_BUFFER_SIZE];
+    cout << "\n매크로로 정의된 버퍼 크기: " << sizeof(buffer) << " 바이트" << endl;
+    
+    // const vs constexpr vs 매크로 비교
+    cout << "\n=== 상수 타입 비교 ===" << endl;
+    cout << "const 상수 (런타임): " << MAX_STUDENTS << endl;
+    cout << "constexpr 상수 (컴파일타임): " << ARRAY_SIZE << endl;
+    cout << "매크로 상수 (전처리): " << MAX_BUFFER_SIZE << endl;
     
     // const 변수는 초기화 후 변경 불가
     // MAX_STUDENTS = 40; // 오류!
@@ -817,11 +840,12 @@ C++의 다양한 형변환 방법과 안전한 캐스팅을 학습합니다.
 주제: 형변환 (Type Casting)
 정의: 하나의 데이터 타입을 다른 데이터 타입으로 변환하는 과정
 
-핵심 개념: 암시적 변환, 명시적 변환, C++ 캐스트 연산자
+핵심 개념: 암시적 변환, 명시적 변환, C++ 캐스트 연산자, void* 포인터
 정의:
 - 암시적 변환: 컴파일러가 자동으로 수행하는 타입 변환
 - 명시적 변환: 프로그래머가 의도적으로 지시하는 타입 변환
 - C++ 캐스트 연산자: static_cast, dynamic_cast, const_cast, reinterpret_cast
+- void* 포인터: 어떤 타입의 포인터든 저장할 수 있는 범용 포인터 (타입 정보 없음)
 */
 
 #include <iostream>
@@ -846,12 +870,36 @@ int main() {
     double result = static_cast<double>(intValue) / 3;
     cout << "정확한 나눗셈: " << intValue << " / 3 = " << result << endl;
     
-    // 포인터 캐스팅
-    void* voidPtr = &intValue;
-    int* intPtr = static_cast<int*>(voidPtr);
-    cout << "void* → int*: " << *intPtr << endl;
+    // void* 포인터와 캐스팅
+    cout << "\n=== void* 포인터 활용 ===" << endl;
+    void* voidPtr = &intValue;  // void*는 어떤 타입의 포인터든 받을 수 있음
+    cout << "void* 주소: " << voidPtr << endl;
+    cout << "int 변수 주소: " << &intValue << endl;
     
-    cout << "\n=== 범위 확인 ===" << endl;
+    // void*는 역참조할 수 없으므로 적절한 타입으로 캐스팅 필요
+    int* intPtr = static_cast<int*>(voidPtr);
+    cout << "void* → int* 캐스팅 후 값: " << *intPtr << endl;
+    
+    // 다른 타입도 void*에 저장 가능
+    double doubleVar = 99.9;
+    voidPtr = &doubleVar;  // 같은 void*에 다른 타입 주소 저장
+    double* doublePtr = static_cast<double*>(voidPtr);
+    cout << "void*에 double 저장 후: " << *doublePtr << endl;
+    
+    cout << "\n=== void* 포인터의 특징과 주의사항 ===" << endl;
+    // void*는 타입 안전성이 없으므로 잘못된 캐스팅 가능
+    int intVar = 42;
+    void* genericPtr = &intVar;
+    
+    // 올바른 사용
+    int* correctPtr = static_cast<int*>(genericPtr);
+    cout << "올바른 캐스팅: " << *correctPtr << endl;
+    
+    // 위험한 사용 (컴파일은 되지만 결과 예측 불가)
+    // double* wrongPtr = static_cast<double*>(genericPtr);
+    // cout << "잘못된 캐스팅: " << *wrongPtr << endl;  // 위험!
+    
+    cout << "주의: void*는 타입 정보가 없어 잘못된 캐스팅 시 예측 불가능한 결과 발생" << endl;
     int largeInt = 300;
     char smallChar = static_cast<char>(largeInt);
     cout << "int " << largeInt << " → char " << static_cast<int>(smallChar) 
