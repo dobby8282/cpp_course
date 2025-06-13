@@ -834,6 +834,7 @@ int main() {
 ---
 
 ## 16. 예제 16: 배열 정렬 - 버블 정렬 (16_bubble_sort.cpp)
+![버블정렬](https://github.com/user-attachments/assets/fa60f87f-ebee-401c-9760-b659d2cb91b2)
 
 ### 예제 정의
 버블 정렬 알고리즘을 구현하여 배열을 정렬합니다.
