@@ -895,6 +895,7 @@ int main() {
 ---
 
 ## 17. 예제 17: 배열 검색 - 선형 검색 (17_linear_search.cpp)
+![선형검색](https://github.com/user-attachments/assets/d1f147c9-57a9-49e8-8183-caa279763d56)
 
 ### 예제 정의
 선형 검색 알고리즘을 구현하여 배열에서 특정 값을 찾습니다.
