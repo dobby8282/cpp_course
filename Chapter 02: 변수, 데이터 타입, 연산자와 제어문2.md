@@ -1007,6 +1007,30 @@ C++의 다양한 형변환 방법과 안전한 캐스팅을 학습합니다.
 - 명시적 변환: 프로그래머가 의도적으로 지시하는 타입 변환
 - C++ 캐스트 연산자: static_cast, dynamic_cast, const_cast, reinterpret_cast
 - void* 포인터: 어떤 타입의 포인터든 저장할 수 있는 범용 포인터 (타입 정보 없음)
+
+C++ 캐스트 연산자 상세:
+1. static_cast<타입>(값):
+   - 컴파일 타임에 타입 변환을 수행
+   - 가장 일반적이고 안전한 캐스트
+   - 기본 타입 간 변환, 상속 관계 포인터 변환 등
+   - 런타임 검사 없음
+
+2. dynamic_cast<타입>(값):
+   - 런타임에 타입 안전성을 검사하는 캐스트
+   - 다형성(상속, 가상함수)이 있는 클래스에서만 사용
+   - 안전하지 않은 캐스트 시 nullptr 또는 예외 발생
+   - 성능 오버헤드 있음
+
+3. const_cast<타입>(값):
+   - const 또는 volatile 속성을 제거하거나 추가
+   - 실제 데이터 타입은 변경하지 않음
+   - const 객체의 const성을 제거할 때 사용 (주의 필요)
+
+4. reinterpret_cast<타입>(값):
+   - 포인터를 다른 타입의 포인터로 재해석
+   - 비트 패턴을 그대로 유지하면서 타입만 변경
+   - 매우 위험하고 플랫폼 종속적
+   - 시스템 프로그래밍에서 제한적 사용
 */
 
 #include <iostream>
@@ -1047,20 +1071,53 @@ int main() {
     double* doublePtr = static_cast<double*>(voidPtr);
     cout << "void*에 double 저장 후: " << *doublePtr << endl;
     
-    cout << "\n=== void* 포인터의 특징과 주의사항 ===" << endl;
-    // void*는 타입 안전성이 없으므로 잘못된 캐스팅 가능
-    int intVar = 42;
-    void* genericPtr = &intVar;
+    cout << "\n=== C++ 캐스트 연산자 상세 ===" << endl;
     
-    // 올바른 사용
-    int* correctPtr = static_cast<int*>(genericPtr);
-    cout << "올바른 캐스팅: " << *correctPtr << endl;
+    // 1. static_cast - 일반적인 타입 변환
+    cout << "1. static_cast (일반적인 타입 변환):" << endl;
+    int intNum = 10;
+    double doubleNum = static_cast<double>(intNum);
+    cout << "   int " << intNum << " → double " << doubleNum << endl;
     
-    // 위험한 사용 (컴파일은 되지만 결과 예측 불가)
-    // double* wrongPtr = static_cast<double*>(genericPtr);
-    // cout << "잘못된 캐스팅: " << *wrongPtr << endl;  // 위험!
+    // 포인터 타입 변환
+    void* voidPtr2 = &intNum;
+    int* intPtr2 = static_cast<int*>(voidPtr2);
+    cout << "   void* → int*: " << *intPtr2 << endl;
     
-    cout << "주의: void*는 타입 정보가 없어 잘못된 캐스팅 시 예측 불가능한 결과 발생" << endl;
+    // 2. const_cast - const 속성 제거/추가
+    cout << "\n2. const_cast (const 속성 제거/추가):" << endl;
+    const int constValue = 100;
+    const int* constPtr = &constValue;
+    
+    // const 포인터에서 const 제거 (주의: 원본이 const면 수정하면 안됨!)
+    int* nonConstPtr = const_cast<int*>(constPtr);
+    cout << "   const int* → int*: " << *nonConstPtr << endl;
+    
+    // 비const를 const로 변환 (안전함)
+    int normalInt = 200;
+    int* normalPtr = &normalInt;
+    const int* constPtr2 = const_cast<const int*>(normalPtr);
+    cout << "   int* → const int*: " << *constPtr2 << endl;
+    
+    // 3. reinterpret_cast - 비트 패턴 재해석 (위험!)
+    cout << "\n3. reinterpret_cast (비트 패턴 재해석 - 위험!):" << endl;
+    int intForReinterpret = 0x41424344;  // ASCII 'ABCD'
+    char* charPtr = reinterpret_cast<char*>(&intForReinterpret);
+    cout << "   int의 비트를 char*로 재해석: ";
+    for (int i = 0; i < 4; i++) {
+        cout << charPtr[i] << " ";
+    }
+    cout << endl;
+    
+    // 포인터를 정수로 변환 (주소값 확인용)
+    uintptr_t address = reinterpret_cast<uintptr_t>(&intNum);
+    cout << "   포인터 주소를 정수로: 0x" << hex << address << dec << endl;
+    
+    cout << "\n=== 캐스트 연산자 안전성 비교 ===" << endl;
+    cout << "static_cast:     안전함 (컴파일 타임 검사)" << endl;
+    cout << "const_cast:      주의 필요 (const 의미 변경)" << endl;
+    cout << "reinterpret_cast: 위험함 (비트 레벨 조작)" << endl;
+    cout << "dynamic_cast:    가장 안전 (런타임 검사, 클래스에서 사용)" << endl;
     int largeInt = 300;
     char smallChar = static_cast<char>(largeInt);
     cout << "int " << largeInt << " → char " << static_cast<int>(smallChar) 
